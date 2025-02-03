@@ -110,6 +110,7 @@ public class MainActivity extends AppCompatActivity {
         );
         datePickerDialog.show();
     }
+    /*
     private void saveData() {
         String name = editContact.getText().toString().trim();
         String address = editAddress.getText().toString().trim();
@@ -123,7 +124,11 @@ public class MainActivity extends AppCompatActivity {
         } else {
             textContact.setText("Saved: " + name + " | " + birthday);
         }
+    }*/
+    private void saveData() {
+        Intent intent = new Intent(MainActivity.this, ContactSettingsActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        startActivity(intent);
     }
-
 
 }
