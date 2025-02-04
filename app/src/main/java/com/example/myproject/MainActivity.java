@@ -28,15 +28,18 @@ public class MainActivity extends AppCompatActivity implements DatePickerDialog.
     private ToggleButton toggleEdit;
     private Button btnSave, buttonBirthday;
     private TextView textContact, textAddress, textBDay, textBirthday;
-    private EditText editContact, editAddress, editCity, editState, editZipcode, editHome, editCell;
+    private EditText editContact, editAddress, editCity, editState, editZipcode, editHome, editCell,editEmail;
     private ImageButton btnContacts, btnMap, btnSettings;
     private LinearLayout toolbar, bottomNavigationBar;
     private Contact currentContact;
+    private ContactDataSource dataSource;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
+
 
         try {
             setContentView(R.layout.activity_main);
@@ -46,8 +49,11 @@ public class MainActivity extends AppCompatActivity implements DatePickerDialog.
                 return insets;
             });
         } catch (Exception e) {
+
             e.printStackTrace();
         }
+        dataSource = new ContactDataSource(this);
+
 
         // Initialize Views
         toolbar = findViewById(R.id.toolbar);
@@ -67,13 +73,19 @@ public class MainActivity extends AppCompatActivity implements DatePickerDialog.
         editCity = findViewById(R.id.editCity);
         editState = findViewById(R.id.editState);
         editZipcode = findViewById(R.id.editZipcode);
+        editHome = findViewById(R.id.editHome);
+        editCell = findViewById(R.id.editCell);
+        editEmail = findViewById(R.id.editEmail);
 
         btnContacts = findViewById(R.id.btnContacts);
         btnMap = findViewById(R.id.btnMap);
         btnSettings = findViewById(R.id.btnSettings);
 
+        if (btnSave == null) {
+            throw new NullPointerException("btnSave not found in activity_main.xml. Check the ID.");
+        }
         // Set click listeners for buttons
-        btnSave.setOnClickListener(v -> saveData());
+        btnSave.setOnClickListener(v -> initSaveButton());
         buttonBirthday.setOnClickListener(v -> initChangeDateButton());
         btnContacts.setOnClickListener(v -> openContacts());
         btnMap.setOnClickListener(v -> openMap());
@@ -123,21 +135,6 @@ public class MainActivity extends AppCompatActivity implements DatePickerDialog.
         datePickerDialog.show();
         currentContact.setBirthday(selectedTime);
 
-    }*/
-    /*
-    private void saveData() {
-        String name = editContact.getText().toString().trim();
-        String address = editAddress.getText().toString().trim();
-        String city = editCity.getText().toString().trim();
-        String state = editState.getText().toString().trim();
-        String zipcode = editZipcode.getText().toString().trim();
-        String birthday = textBirthday.getText().toString().trim();
-
-        if (name.isEmpty() || address.isEmpty() || city.isEmpty() || state.isEmpty() || zipcode.isEmpty()) {
-            textContact.setText("Please fill in all fields before saving.");
-        } else {
-            textContact.setText("Saved: " + name + " | " + birthday);
-        }
     }*/
 
     @Override
@@ -303,6 +300,51 @@ public class MainActivity extends AppCompatActivity implements DatePickerDialog.
             public void afterTextChanged(Editable s) {
                 currentContact.seteMail(editEmail.getText().toString());
 
+            }
+        });
+    }
+    private void setForEditing(boolean enabled) {
+        findViewById(R.id.editContact).setEnabled(enabled);
+        findViewById(R.id.editAddress).setEnabled(enabled);
+        findViewById(R.id.editCity).setEnabled(enabled);
+        findViewById(R.id.editState).setEnabled(enabled);
+        findViewById(R.id.editZipcode).setEnabled(enabled);
+        findViewById(R.id.editHome).setEnabled(enabled);
+        findViewById(R.id.editCell).setEnabled(enabled);
+        findViewById(R.id.editEmail).setEnabled(enabled);
+        findViewById(R.id.buttonBirthday).setEnabled(enabled);
+    }
+    private void initSaveButton(){
+        Button saveButton = findViewById(R.id.btnSave);
+
+        if (saveButton == null) {
+            throw new NullPointerException("buttonSave not found in activity_main.xml. Check your layout file.");
+        }
+
+        saveButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                boolean wasSuccessful;
+                ContactDataSource ds = new ContactDataSource(MainActivity.this);
+                try{
+                    ds.open();
+                    if (currentContact.getContactID() == -1) {
+                        wasSuccessful= ds.insertContact(currentContact);
+                    } else {
+                        wasSuccessful = ds.updateContact(currentContact);
+                    }
+                    ds.close();
+                } catch (Exception e) {
+                    wasSuccessful = false;
+                    e.printStackTrace();
+                }
+               if (wasSuccessful) {
+                   ToggleButton editToggle = findViewById(R.id.toggleEdit);
+                   if (editToggle != null) {
+                       editToggle.toggle();
+                   }
+                   setForEditing(false);
+               }
             }
         });
     }
