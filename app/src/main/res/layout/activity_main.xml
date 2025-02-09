@@ -264,7 +264,7 @@
             <EditText
                 android:id="@+id/editEmail"
                 android:layout_width="329dp"
-                android:layout_height="40dp"
+                android:layout_height="48dp"
                 android:inputType="text"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -313,12 +313,5 @@
         </androidx.constraintlayout.widget.ConstraintLayout>
     </ScrollView>
 
-    <!-- Address Fields -->
-
-    <!-- City, State, Zipcode Fields -->
-
-    <!-- Birthday Section (Missing IDs Fixed) -->
-
-    <!-- Bottom Navigation Bar -->
 
 </androidx.constraintlayout.widget.ConstraintLayout>
