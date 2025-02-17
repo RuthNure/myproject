@@ -47,4 +47,6 @@
             android:src="@drawable/settingsicon" />
 
     </LinearLayout>
+
+
 </androidx.constraintlayout.widget.ConstraintLayout>
