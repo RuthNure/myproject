@@ -21,12 +21,16 @@ public class ContactListActivity extends AppCompatActivity {
     private ImageButton btnMap, btnContacts, btnSettings;
     private ContactDataSource dataSource;
 
+    private ArrayList<Contact> contacts;
+
     private View.OnClickListener onItemClickListener = new View.OnClickListener(){
         @Override
         public void onClick(View view) {
             RecyclerView.ViewHolder viewHolder = (RecyclerView.ViewHolder)view.getTag(); //gets references to viewholder from click
             int position = viewHolder.getAdapterPosition(); //use viewholder to get teh posoion in list
+            int contactId = contacts.get(position).getContactID();
             Intent intent = new Intent(ContactListActivity.this, MainActivity.class);
+                intent.putExtra("contactID", contactId);
             startActivity(intent);
         }
     };
@@ -51,20 +55,20 @@ public class ContactListActivity extends AppCompatActivity {
 
         dataSource = new ContactDataSource(this);
 
-        ArrayList<String> names;
+        //ArrayList<Contact> contacts;
         try {
             Log.d("DEBUG", "Attempting to open database...");
             dataSource.open();
 
             Log.d("DEBUG", "Database opened successfully, retrieving contact names...");
-            names = dataSource.getContactName(); // Get contact names
+            contacts = dataSource.getContacts(); // Get contact names
 
             dataSource.close();
             Log.d("DEBUG", "Database closed successfully.");
 
-            if (names == null) {
+            if (contacts == null) {
                 Log.w("WARNING", "getContactName() returned null. Initializing empty list.");
-                names = new ArrayList<>(); // Prevent null crash
+                contacts = new ArrayList<>(); // Prevent null crash
             }
 
             RecyclerView contactList = findViewById(R.id.rvContacts);
@@ -78,7 +82,7 @@ public class ContactListActivity extends AppCompatActivity {
             RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this);
             contactList.setLayoutManager(layoutManager);
 
-            ContactAdapter contactAdapter = new ContactAdapter(names);
+            ContactAdapter contactAdapter = new ContactAdapter(contacts);
             contactAdapter.setOnItemClickListener(onItemClickListener);
             contactList.setAdapter(contactAdapter);
 
