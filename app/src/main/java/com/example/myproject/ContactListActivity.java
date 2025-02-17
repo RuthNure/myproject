@@ -3,6 +3,7 @@ package com.example.myproject;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
 import android.widget.ImageButton;
 import android.widget.Toast;
 
@@ -19,6 +20,16 @@ import java.util.ArrayList;
 public class ContactListActivity extends AppCompatActivity {
     private ImageButton btnMap, btnContacts, btnSettings;
     private ContactDataSource dataSource;
+
+    private View.OnClickListener onItemClickListener = new View.OnClickListener(){
+        @Override
+        public void onClick(View view) {
+            RecyclerView.ViewHolder viewHolder = (RecyclerView.ViewHolder)view.getTag(); //gets references to viewholder from click
+            int position = viewHolder.getAdapterPosition(); //use viewholder to get teh posoion in list
+            Intent intent = new Intent(ContactListActivity.this, MainActivity.class);
+            startActivity(intent);
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -68,6 +79,7 @@ public class ContactListActivity extends AppCompatActivity {
             contactList.setLayoutManager(layoutManager);
 
             ContactAdapter contactAdapter = new ContactAdapter(names);
+            contactAdapter.setOnItemClickListener(onItemClickListener);
             contactList.setAdapter(contactAdapter);
 
             Log.d("DEBUG", "Contacts loaded successfully");

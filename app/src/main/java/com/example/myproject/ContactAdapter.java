@@ -12,6 +12,7 @@ import java.util.ArrayList;
 
 public class ContactAdapter extends RecyclerView.Adapter {
     private ArrayList<String> contactData;
+    private View.OnClickListener mOnItemClickListener; //variable for listener
     @NonNull
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -37,6 +38,8 @@ public class ContactAdapter extends RecyclerView.Adapter {
         public ContactViewHolder(@NonNull View itemView){
             super(itemView);
             textViewContact = itemView.findViewById(R.id.textViewName);
+                itemView.setTag(this); //help to identifiy which item was clicked
+                itemView.setOnClickListener(mOnItemClickListener); //sets the view holder listener to the listerner passed from actovity
         }
         
         public TextView getContactTextView() {
@@ -46,5 +49,8 @@ public class ContactAdapter extends RecyclerView.Adapter {
     
     public ContactAdapter (ArrayList<String> arrayList){
         contactData = arrayList;
+    }
+    public void setOnItemClickListener(View.OnClickListener itemClickListener) {
+        this.mOnItemClickListener = itemClickListener; //method to pass listerned from activty to the adapter
     }
 }
