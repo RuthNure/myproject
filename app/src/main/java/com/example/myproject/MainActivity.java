@@ -96,6 +96,11 @@ public class MainActivity extends AppCompatActivity implements DatePickerDialog.
         currentContact = new Contact();
 
         initTextChangedEvents();
+        toggleEdit.setChecked(true);
+        setForEditing(true);
+        toggleEdit.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            setForEditing(isChecked);
+        });
 
 
     }
@@ -139,7 +144,7 @@ public class MainActivity extends AppCompatActivity implements DatePickerDialog.
 
     @Override
     public void didFinishDatePickerDialog(java.util.Calendar selectedTime) {
-        TextView birthDay = findViewById(R.id.textBDay);
+        TextView birthDay = findViewById(R.id.textBirthday);
         birthDay.setText(DateFormat.format("MM/dd/yyyy", selectedTime));
         currentContact.setBirthday(selectedTime);
     }
@@ -301,6 +306,7 @@ public class MainActivity extends AppCompatActivity implements DatePickerDialog.
 
             }
         });
+
     }
     private void setForEditing(boolean enabled) {
         findViewById(R.id.editContact).setEnabled(enabled);
@@ -314,28 +320,27 @@ public class MainActivity extends AppCompatActivity implements DatePickerDialog.
         findViewById(R.id.buttonBirthday).setEnabled(enabled);
     }
     private void initSaveButton() {
-        btnSave.setOnClickListener(v -> {
             boolean wasSuccessful;
             try {
-                dataSource.open();  // Use the existing 'dataSource' object
+                dataSource.open();
                 if (currentContact.getContactID() == -1) {
-                    wasSuccessful = dataSource.insertContact(currentContact); // Use 'dataSource'
+                    wasSuccessful = dataSource.insertContact(currentContact);
+                    if (wasSuccessful) {
+                        int newId = dataSource.getLastContactID();
+                        currentContact.setContactID(newId);
+                    }
                 } else {
-                    wasSuccessful = dataSource.updateContact(currentContact); // Use 'dataSource'
+                    wasSuccessful = dataSource.updateContact(currentContact);
                 }
-                dataSource.close();  // Close after operations
+                dataSource.close();
             } catch (Exception e) {
                 wasSuccessful = false;
                 e.printStackTrace();
             }
 
             if (wasSuccessful) {
-                ToggleButton editToggle = findViewById(R.id.toggleEdit);
-                if (editToggle != null) {
-                    editToggle.toggle();
-                }
-                setForEditing(false);
+               toggleEdit.setChecked(false);
+               setForEditing(false);
             }
-        });
     }
 }
