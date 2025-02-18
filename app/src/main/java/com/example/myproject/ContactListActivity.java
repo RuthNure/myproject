@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.Toast;
 
@@ -85,6 +86,7 @@ public class ContactListActivity extends AppCompatActivity {
             ContactAdapter contactAdapter = new ContactAdapter(contacts);
             contactAdapter.setOnItemClickListener(onItemClickListener);
             contactList.setAdapter(contactAdapter);
+            initAddContactButton();
 
             Log.d("DEBUG", "Contacts loaded successfully");
         } catch (Exception e) {
@@ -108,5 +110,15 @@ public class ContactListActivity extends AppCompatActivity {
         ImageButton ibContacts = findViewById(R.id.btnContacts);
         ibContacts.setEnabled(false);
 
+    }
+    private void initAddContactButton(){
+        Button newContact = findViewById(R.id.buttonAddContact);
+        newContact.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(ContactListActivity.this, MainActivity.class);
+                startActivity(intent);
+            }
+        });
     }
 }
