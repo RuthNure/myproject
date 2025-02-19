@@ -128,25 +128,32 @@ public class ContactListActivity extends AppCompatActivity {
             dataSource.close();
             Log.d("DEBUG", "Database closed successfully.");
 
-            if (contacts == null) {
-                Log.w("WARNING", "getContactName() returned null. Initializing empty list.");
-                contacts = new ArrayList<>(); // Prevent null crash
+            if (contacts.size() > 0) {
+
+
+                if (contacts == null) {
+                    Log.w("WARNING", "getContactName() returned null. Initializing empty list.");
+                    contacts = new ArrayList<>(); // Prevent null crash
+                }
+
+                RecyclerView contactList = findViewById(R.id.rvContacts);
+                if (contactList == null) {
+                    Log.e("ERROR", "RecyclerView rvContacts not found in layout");
+                    Toast.makeText(this, "RecyclerView not found", Toast.LENGTH_LONG).show();
+                    return;
+                }
+
+                Log.d("DEBUG", "Setting up RecyclerView...");
+                RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this);
+                contactList.setLayoutManager(layoutManager);
+
+                contactAdapter = new ContactAdapter(contacts, this);
+                contactAdapter.setOnItemClickListener(onItemClickListener);
+                contactList.setAdapter(contactAdapter);
+            } else {
+                Intent intent = new Intent(ContactListActivity.this, MainActivity.class);
+                startActivity(intent);
             }
-
-            RecyclerView contactList = findViewById(R.id.rvContacts);
-            if (contactList == null) {
-                Log.e("ERROR", "RecyclerView rvContacts not found in layout");
-                Toast.makeText(this, "RecyclerView not found", Toast.LENGTH_LONG).show();
-                return;
-            }
-
-            Log.d("DEBUG", "Setting up RecyclerView...");
-            RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this);
-            contactList.setLayoutManager(layoutManager);
-
-            contactAdapter = new ContactAdapter(contacts, this);
-            contactAdapter.setOnItemClickListener(onItemClickListener);
-            contactList.setAdapter(contactAdapter);
 
 
             Log.d("DEBUG", "Contacts loaded successfully");
