@@ -164,5 +164,16 @@ public class ContactDataSource {
         return contact;
     }
 
+    public boolean deletecontact(int contactId){
+        boolean didDelete = false;
+        try {
+            didDelete = database.delete("contact", "_id=" + contactId, null)>0;
+        }
+        catch (Exception e){
+
+        }
+        return didDelete;
+    }
+
 
 }

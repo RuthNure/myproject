@@ -1,29 +1,39 @@
 package com.example.myproject;
 
+import android.content.Context;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
 
-public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.ContactViewHolder> {  // ✅ Correct generic typing
+public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.ContactViewHolder> {
     private ArrayList<Contact> contactData;
     private View.OnClickListener mOnItemClickListener; // Click listener
+    private boolean isDeleting;
+    private Context parentContext;
 
     // Constructor
-    public ContactAdapter(ArrayList<Contact> arrayList) {
+    public ContactAdapter(ArrayList<Contact> arrayList, Context context) {
         contactData = arrayList;
+        parentContext = context;
     }
 
     // Method to set click listener from Activity
     public void setOnItemClickListener(View.OnClickListener itemClickListener) {
         this.mOnItemClickListener = itemClickListener;
+    }
+
+    public void setDelete(boolean isDeleting) {
+        this.isDeleting = isDeleting;
+        notifyDataSetChanged(); // Refresh RecyclerView when deleting mode changes
     }
 
     @NonNull
@@ -43,7 +53,7 @@ public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.ContactV
             Log.e("ERROR", "getContactTextView() returned null at position: " + position);
         } else {
             Log.d("DEBUG", "Setting contact name for position: " + position);
-            holder.textContactName.setText(contactData.get(position).getContactName());
+            holder.textContactName.setText(contact.getContactName());
         }
 
         // Set phone number
@@ -51,12 +61,40 @@ public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.ContactV
             Log.e("ERROR", "getTextPhoneView() returned null at position: " + position);
         } else {
             Log.d("DEBUG", "Setting phone number for position: " + position);
-            holder.textPhoneNumber.setText(contactData.get(position).getPhoneNumber());
+            holder.textPhoneNumber.setText(contact.getPhoneNumber());
         }
 
-        // ✅ Set click listener here (not in the ViewHolder constructor)
+        // Set click listener
         holder.itemView.setTag(holder);
         holder.itemView.setOnClickListener(mOnItemClickListener);
+
+        // Handle delete button visibility
+        if (isDeleting) {
+            holder.deleteButton.setVisibility(View.VISIBLE);
+            holder.deleteButton.setOnClickListener(view -> deleteItem(position));
+        } else {
+            holder.deleteButton.setVisibility(View.INVISIBLE);
+        }
+    }
+
+    private void deleteItem(int position) {
+        Contact contact = contactData.get(position);
+        ContactDataSource ds = new ContactDataSource(parentContext);
+        try {
+            ds.open();
+            boolean didDelete = ds.deletecontact(contact.getContactID()); // Ensure correct method name
+            ds.close();
+
+            if (didDelete) {
+                contactData.remove(position);
+                notifyDataSetChanged();
+                Toast.makeText(parentContext, "Contact Deleted!", Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(parentContext, "Delete failed!", Toast.LENGTH_LONG).show();
+            }
+        } catch (Exception e) {
+            Toast.makeText(parentContext, "Delete failed!", Toast.LENGTH_LONG).show();
+        }
     }
 
     @Override
@@ -72,7 +110,7 @@ public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.ContactV
 
         public ContactViewHolder(@NonNull View itemView) {
             super(itemView);
-            textContactName = itemView.findViewById(R.id.textContactName);  // ✅ Ensure correct ID
+            textContactName = itemView.findViewById(R.id.textContactName);
             textPhoneNumber = itemView.findViewById(R.id.textPhoneNumber);
             deleteButton = itemView.findViewById(R.id.buttonDeleteContact);
 

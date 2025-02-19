@@ -5,7 +5,9 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.ImageButton;
+import android.widget.Switch;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
@@ -23,6 +25,8 @@ public class ContactListActivity extends AppCompatActivity {
     private ContactDataSource dataSource;
 
     private ArrayList<Contact> contacts;
+
+    private ContactAdapter contactAdapter; // Class-level variable
 
     private View.OnClickListener onItemClickListener = new View.OnClickListener(){
         @Override
@@ -54,6 +58,7 @@ public class ContactListActivity extends AppCompatActivity {
         btnContacts.setOnClickListener(v -> openContacts());
         btnSettings.setOnClickListener(v -> openSettings());
 
+
         dataSource = new ContactDataSource(this);
 
         //ArrayList<Contact> contacts;
@@ -83,7 +88,7 @@ public class ContactListActivity extends AppCompatActivity {
             RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this);
             contactList.setLayoutManager(layoutManager);
 
-            ContactAdapter contactAdapter = new ContactAdapter(contacts);
+            contactAdapter = new ContactAdapter(contacts, this);
             contactAdapter.setOnItemClickListener(onItemClickListener);
             contactList.setAdapter(contactAdapter);
             initAddContactButton();
@@ -93,6 +98,7 @@ public class ContactListActivity extends AppCompatActivity {
             Log.e("ERROR", "Exception retrieving contacts", e);
             Toast.makeText(this, "Error retrieving contacts", Toast.LENGTH_LONG).show();
         }
+        initDeleteSwitch();
     }
     private void openSettings() {
         Intent intent = new Intent(ContactListActivity.this, ContactSettingsActivity.class);
@@ -121,4 +127,19 @@ public class ContactListActivity extends AppCompatActivity {
             }
         });
     }
+    private void initDeleteSwitch() {
+        Switch s = findViewById(R.id.switchDelete);
+        s.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean isChecked) {
+                Boolean status = compoundButton.isChecked();
+                contactAdapter.setDelete(status);
+                contactAdapter.notifyDataSetChanged();
+
+            }
+        });
+
+        }
+
+
 }

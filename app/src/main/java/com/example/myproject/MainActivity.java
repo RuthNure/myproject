@@ -192,6 +192,8 @@ public class MainActivity extends AppCompatActivity implements DatePickerDialog.
     }
 
     private void initSaveButton() {
+        dataSource = new ContactDataSource(MainActivity.this);
+
         boolean wasSuccessful;
         try {
             dataSource.open();
@@ -217,12 +219,12 @@ public class MainActivity extends AppCompatActivity implements DatePickerDialog.
     }
 
     private void initContact(int id) {
-        ContactDataSource ds = new ContactDataSource(MainActivity.this);
+        dataSource = new ContactDataSource(MainActivity.this);
 
         try {
-            ds.open();
-            currentContact = ds.getSpecificContact(id);
-            ds.close();
+            dataSource.open();
+            currentContact = dataSource.getSpecificContact(id);
+            dataSource.close();
         } catch (Exception e) {
             Toast.makeText(this, "Load Contact Failed", Toast.LENGTH_LONG).show();
             return;
