@@ -1,5 +1,6 @@
 package com.example.myproject;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
@@ -57,6 +58,10 @@ public class ContactListActivity extends AppCompatActivity {
         btnMap.setOnClickListener(v -> openMap());
         btnContacts.setOnClickListener(v -> openContacts());
         btnSettings.setOnClickListener(v -> openSettings());
+        /*
+        String sortBy = getSharedPreferences("MyContactListPreferences", Context.MODE_PRIVATE).getString("sortfield", "contactname");
+        String orderBy = getSharedPreferences("MyContactListPreferences", Context.MODE_PRIVATE).getString("sortorder", "ASC");
+
 
 
         dataSource = new ContactDataSource(this);
@@ -67,7 +72,7 @@ public class ContactListActivity extends AppCompatActivity {
             dataSource.open();
 
             Log.d("DEBUG", "Database opened successfully, retrieving contact names...");
-            contacts = dataSource.getContacts(); // Get contact names
+            contacts = dataSource.getContacts(sortBy, orderBy); // Get contact names
 
             dataSource.close();
             Log.d("DEBUG", "Database closed successfully.");
@@ -91,15 +96,68 @@ public class ContactListActivity extends AppCompatActivity {
             contactAdapter = new ContactAdapter(contacts, this);
             contactAdapter.setOnItemClickListener(onItemClickListener);
             contactList.setAdapter(contactAdapter);
-            initAddContactButton();
+
+
+            Log.d("DEBUG", "Contacts loaded successfully");
+        } catch (Exception e) {
+            Log.e("ERROR", "Exception retrieving contacts", e);
+            Toast.makeText(this, "Error retrieving contacts", Toast.LENGTH_LONG).show();
+        }*/
+        initDeleteSwitch();
+        initAddContactButton();
+    }
+
+    public void onResume(){
+        super.onResume();
+
+        String sortBy = getSharedPreferences("MyContactListPreferences", Context.MODE_PRIVATE).getString("sortfield", "contactname");
+        String orderBy = getSharedPreferences("MyContactListPreferences", Context.MODE_PRIVATE).getString("sortorder", "ASC");
+
+
+
+        dataSource = new ContactDataSource(this);
+
+        //ArrayList<Contact> contacts;
+        try {
+            Log.d("DEBUG", "Attempting to open database...");
+            dataSource.open();
+
+            Log.d("DEBUG", "Database opened successfully, retrieving contact names...");
+            contacts = dataSource.getContacts(sortBy, orderBy); // Get contact names
+
+            dataSource.close();
+            Log.d("DEBUG", "Database closed successfully.");
+
+            if (contacts == null) {
+                Log.w("WARNING", "getContactName() returned null. Initializing empty list.");
+                contacts = new ArrayList<>(); // Prevent null crash
+            }
+
+            RecyclerView contactList = findViewById(R.id.rvContacts);
+            if (contactList == null) {
+                Log.e("ERROR", "RecyclerView rvContacts not found in layout");
+                Toast.makeText(this, "RecyclerView not found", Toast.LENGTH_LONG).show();
+                return;
+            }
+
+            Log.d("DEBUG", "Setting up RecyclerView...");
+            RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this);
+            contactList.setLayoutManager(layoutManager);
+
+            contactAdapter = new ContactAdapter(contacts, this);
+            contactAdapter.setOnItemClickListener(onItemClickListener);
+            contactList.setAdapter(contactAdapter);
+
 
             Log.d("DEBUG", "Contacts loaded successfully");
         } catch (Exception e) {
             Log.e("ERROR", "Exception retrieving contacts", e);
             Toast.makeText(this, "Error retrieving contacts", Toast.LENGTH_LONG).show();
         }
-        initDeleteSwitch();
+
     }
+
+
     private void openSettings() {
         Intent intent = new Intent(ContactListActivity.this, ContactSettingsActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);

@@ -106,11 +106,11 @@ public class ContactDataSource {
         } return contactNames;
     }
 
-    public ArrayList<Contact> getContacts() {
+    public ArrayList<Contact> getContacts(String sortField, String sortOrder) {
         ArrayList<Contact> contacts = new ArrayList<Contact>();
 
         try {
-            String query = "Select * from contact";
+            String query = "Select * from contact Order by " + sortField + " " + sortOrder;
             Cursor cursor = database.rawQuery(query, null);
 
             Contact newContact;
