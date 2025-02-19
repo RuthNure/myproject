@@ -7,6 +7,7 @@ import android.telephony.PhoneNumberFormattingTextWatcher;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.text.format.DateFormat;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -39,6 +40,8 @@ public class MainActivity extends AppCompatActivity implements DatePickerDialog.
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_main);
+
+        dataSource = new ContactDataSource(this);
 
         initViews();
         initTextChangedEvents();
@@ -177,6 +180,38 @@ public class MainActivity extends AppCompatActivity implements DatePickerDialog.
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {}
         });
+        editHome.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void afterTextChanged(Editable s) {
+                currentContact.setPhoneNumber(editHome.getText().toString());
+            }
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {}
+        });
+
+        editCell.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void afterTextChanged(Editable s) {
+                currentContact.setCellNumber(editCell.getText().toString());
+            }
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {}
+        });
+
+        editEmail.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void afterTextChanged(Editable s) {
+                currentContact.seteMail(editEmail.getText().toString());
+            }
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {}
+        });
     }
 
     private void setForEditing(boolean enabled) {
@@ -190,7 +225,7 @@ public class MainActivity extends AppCompatActivity implements DatePickerDialog.
         editEmail.setEnabled(enabled);
         buttonBirthday.setEnabled(enabled);
     }
-
+/*
     private void initSaveButton() {
         dataSource = new ContactDataSource(MainActivity.this);
 
@@ -216,7 +251,40 @@ public class MainActivity extends AppCompatActivity implements DatePickerDialog.
             toggleEdit.setChecked(false);
             setForEditing(false);
         }
+    }*/
+private void initSaveButton() {
+    dataSource = new ContactDataSource(MainActivity.this);
+
+    boolean wasSuccessful;
+    try {
+        dataSource.open();
+
+        Log.d("SAVE", "Saving Contact: " + currentContact.getContactName());
+        Log.d("SAVE", "Phone: " + currentContact.getPhoneNumber());
+        Log.d("SAVE", "Cell: " + currentContact.getCellNumber());
+        Log.d("SAVE", "Email: " + currentContact.geteMail());
+
+        if (currentContact.getContactID() == -1) {
+            wasSuccessful = dataSource.insertContact(currentContact);
+            if (wasSuccessful) {
+                int newId = dataSource.getLastContactID();
+                currentContact.setContactID(newId);
+            }
+        } else {
+            wasSuccessful = dataSource.updateContact(currentContact);
+        }
+        dataSource.close();
+    } catch (Exception e) {
+        wasSuccessful = false;
+        e.printStackTrace();
     }
+
+    if (wasSuccessful) {
+        toggleEdit.setChecked(false);
+        setForEditing(false);
+    }
+}
+
 
     private void initContact(int id) {
         dataSource = new ContactDataSource(MainActivity.this);

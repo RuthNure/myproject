@@ -5,6 +5,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
+import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -125,9 +126,17 @@ public class ContactDataSource {
                 newContact.setPhoneNumber(cursor.getString(6));
                 newContact.setCellNumber(cursor.getString(7));
                 newContact.seteMail(cursor.getString(8));
+
                 Calendar calendar = Calendar.getInstance();
                 calendar.setTimeInMillis(Long.valueOf(cursor.getString(9)));
                 newContact.setBirthday(calendar);
+
+
+                Log.d("DATABASE", "Loaded Contact: " + newContact.getContactName() +
+                        ", Phone: " + newContact.getPhoneNumber() +
+                        ", Cell: " + newContact.getCellNumber() +
+                        ", Email: " + newContact.geteMail());
+
                 contacts.add(newContact);
                 cursor.moveToNext();
             }
