@@ -63,6 +63,12 @@ public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.ContactV
             Log.d("DEBUG", "Setting phone number for position: " + position);
             holder.textPhoneNumber.setText(contact.getPhoneNumber());
         }
+        /*if (holder.textEmail == null) {
+            Log.e("ERROR", "getTextPhoneView() returned null at position: " + position);
+        } else {
+            Log.d("DEBUG", "Setting phone number for position: " + position);
+            holder.textEmail.setText(contact.geteMail());
+        }*/
 
         // Set click listener
         holder.itemView.setTag(holder);
@@ -106,12 +112,14 @@ public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.ContactV
     public static class ContactViewHolder extends RecyclerView.ViewHolder {
         public TextView textContactName;
         public TextView textPhoneNumber;
+        //public TextView textEmail;
         public Button deleteButton;
 
         public ContactViewHolder(@NonNull View itemView) {
             super(itemView);
             textContactName = itemView.findViewById(R.id.textContactName);
             textPhoneNumber = itemView.findViewById(R.id.textPhoneNumber);
+            //textEmail = itemView.findViewById(R.id.textEmail);
             deleteButton = itemView.findViewById(R.id.buttonDeleteContact);
 
             // Debugging logs
@@ -121,9 +129,12 @@ public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.ContactV
             if (textPhoneNumber == null) {
                 Log.e("ERROR", "TextView textPhoneNumber is NULL in ViewHolder");
             }
+           /* if (textEmail == null) {
+                Log.e("ERROR", "TextView textEmail is NULL in ViewHolder");
+            }
             if (deleteButton == null) {
                 Log.e("ERROR", "Button deleteButton is NULL in ViewHolder");
-            }
+            }*/
         }
     }
 }
