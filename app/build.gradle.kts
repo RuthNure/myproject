@@ -1,5 +1,6 @@
 plugins {
     alias(libs.plugins.android.application)
+    //id(".com.google.android.libraries.mapsplatform.secrets-gradle-plugin")
 }
 
 android {
@@ -29,6 +30,9 @@ android {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
+    /*buildFeatures {
+        buildConfig = true
+    }*/
 }
 
 dependencies {
@@ -37,7 +41,9 @@ dependencies {
     implementation(libs.material)
     implementation(libs.activity)
     implementation(libs.constraintlayout)
- //   implementation(libs.play.services.maps)
+    implementation(libs.play.services.maps)
+    implementation(libs.play.services.location)
+    //   implementation(libs.play.services.maps)
     //implementation(libs.play.services.maps.license)
     //implementation(libs.play.services)
     testImplementation(libs.junit)

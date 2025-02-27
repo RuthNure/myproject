@@ -11,6 +11,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.core.content.ContextCompat;
 
 import java.util.ArrayList;
 
@@ -54,6 +55,9 @@ public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.ContactV
         } else {
             Log.d("DEBUG", "Setting contact name for position: " + position);
             holder.textContactName.setText(contact.getContactName());
+
+            int colorResId = (position % 2 == 0) ? R.color.system_red : R.color.system_blue;
+            holder.textContactName.setTextColor(ContextCompat.getColor(parentContext, colorResId));
         }
 
         // Set phone number
@@ -81,6 +85,7 @@ public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.ContactV
         } else {
             holder.deleteButton.setVisibility(View.INVISIBLE);
         }
+
     }
 
     private void deleteItem(int position) {
