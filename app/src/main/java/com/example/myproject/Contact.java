@@ -8,7 +8,7 @@ public class Contact {
     private String streetAddress;
     private String city;
     private String state;
-    private String zipCode;
+    private String zipcode;
     private String phoneNumber;
     private String cellNumber;
     private String eMail;
@@ -59,11 +59,11 @@ public class Contact {
     }
 
     public String getZipCode() {
-        return zipCode;
+        return zipcode;
     }
 
-    public void setZipCode(String zipCode) {
-        this.zipCode = zipCode;
+    public void setZipCode(String zipcode) {
+        this.zipcode = zipcode;
     }
 
     public String getPhoneNumber() {

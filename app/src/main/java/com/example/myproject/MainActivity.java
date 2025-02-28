@@ -104,6 +104,14 @@ public class MainActivity extends AppCompatActivity implements DatePickerDialog.
 
     private void openMap() {
         Intent intent = new Intent(MainActivity.this, ContactMapActivity.class);
+
+        if(currentContact.getContactID() != -1) {
+            Toast.makeText(getBaseContext(), "Contact must be saved before it can be mapped", Toast.LENGTH_LONG).show();
+        }else {
+            intent.putExtra("contactId", currentContact.getContactID());
+        }
+
+
         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         startActivity(intent);
     }
@@ -180,6 +188,20 @@ public class MainActivity extends AppCompatActivity implements DatePickerDialog.
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {}
         });
+
+        editZipcode.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void afterTextChanged(Editable s) {
+                currentContact.setZipCode(editZipcode.getText().toString());
+            }
+
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {}
+        });
+
         editHome.addTextChangedListener(new TextWatcher() {
             @Override
             public void afterTextChanged(Editable s) {
