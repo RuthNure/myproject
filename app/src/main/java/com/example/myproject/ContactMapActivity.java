@@ -6,6 +6,10 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Point;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
@@ -68,6 +72,11 @@ public class ContactMapActivity extends AppCompatActivity implements OnMapReadyC
     ArrayList<Contact> contacts = new ArrayList<>();
     Contact currentContact = null;
     GoogleMap gMap;
+    SensorManager sensorManager;
+    Sensor accelerometer;
+    Sensor magnetometer;
+
+    TextView textHeading;
     final int PERMISSION_REQUEST_LOCATION = 101;
     private boolean locationUpdatesRequested = false;
 
@@ -82,10 +91,9 @@ public class ContactMapActivity extends AppCompatActivity implements OnMapReadyC
         try {
             ContactDataSource ds = new ContactDataSource(ContactMapActivity.this);
             ds.open();
-            if(extras != null) {
+            if (extras != null) {
                 currentContact = ds.getSpecificContact(extras.getInt("contactId"));
-            }
-            else {
+            } else {
                 contacts = ds.getContacts("contactname", "ASC");
             }
             ds.close();
@@ -100,9 +108,23 @@ public class ContactMapActivity extends AppCompatActivity implements OnMapReadyC
         createLocationRequest();
         createLocationCallback();
 
-       // initGetLocationButton();
+        // initGetLocationButton();
         initNavigationButtons();
         initMapTypeButton();
+
+        sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+        accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+        magnetometer = sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
+
+        if (accelerometer != null && magnetometer != null) {
+            sensorManager.registerListener(mySensorEventListener, accelerometer, SensorManager.SENSOR_DELAY_FASTEST);
+            sensorManager.registerListener(mySensorEventListener, magnetometer, SensorManager.SENSOR_DELAY_FASTEST);
+        } else {
+            Toast.makeText(this, "Sensors not found", Toast.LENGTH_LONG).show();
+        }
+
+        textHeading = findViewById(R.id.textHeading);
+
 
     }
 
@@ -122,6 +144,7 @@ public class ContactMapActivity extends AppCompatActivity implements OnMapReadyC
         ImageButton ibMap = findViewById(R.id.btnMap);
         ibMap.setEnabled(false);
     }
+
     private void initNavigationButtons() {
         ImageButton btnContacts = findViewById(R.id.btnContacts);
         btnContacts.setOnClickListener(v -> openContacts());
@@ -226,52 +249,53 @@ public class ContactMapActivity extends AppCompatActivity implements OnMapReadyC
         gMap.setMyLocationEnabled(true);
         locationUpdatesRequested = true;
     }
-        /*try {
-            locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-            gpsListener = new LocationListener() {
-                @Override
-                public void onLocationChanged(@NonNull Location location) {
-                    if (isBetterLocation(location)) {
-                        currentBestLocation = location;
-                    }
-                    TextView textLatitude = findViewById(R.id.textLatitude);
-                    TextView textLongitude = findViewById(R.id.textLongitude);
-                    TextView textAccuracy = findViewById(R.id.textAccuracy);
-                    if (currentBestLocation != null) {
-                        textLatitude.setText(String.valueOf(currentBestLocation.getLatitude()));
-                        textLongitude.setText(String.valueOf(currentBestLocation.getLongitude()));
-                        textAccuracy.setText(String.valueOf(currentBestLocation.getAccuracy()));
-                    }
-                }
-                @Override
-                public void onStatusChanged(String provider, int status, Bundle extras) { }
-                @Override
-                public void onProviderEnabled(String provider) { }
-                @Override
-                public void onProviderDisabled(String provider) { }
-            };
 
-            networkListener = new LocationListener() {
-                @Override
-                public void onLocationChanged(@NonNull Location location) {
-                    if (isBetterLocation(location)) {
-                        currentBestLocation = location;
-                    }
+    /*try {
+        locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+        gpsListener = new LocationListener() {
+            @Override
+            public void onLocationChanged(@NonNull Location location) {
+                if (isBetterLocation(location)) {
+                    currentBestLocation = location;
                 }
-                @Override
-                public void onStatusChanged(String provider, int status, Bundle extras) { }
-                @Override
-                public void onProviderEnabled(String provider) { }
-                @Override
-                public void onProviderDisabled(String provider) { }
-            };
+                TextView textLatitude = findViewById(R.id.textLatitude);
+                TextView textLongitude = findViewById(R.id.textLongitude);
+                TextView textAccuracy = findViewById(R.id.textAccuracy);
+                if (currentBestLocation != null) {
+                    textLatitude.setText(String.valueOf(currentBestLocation.getLatitude()));
+                    textLongitude.setText(String.valueOf(currentBestLocation.getLongitude()));
+                    textAccuracy.setText(String.valueOf(currentBestLocation.getAccuracy()));
+                }
+            }
+            @Override
+            public void onStatusChanged(String provider, int status, Bundle extras) { }
+            @Override
+            public void onProviderEnabled(String provider) { }
+            @Override
+            public void onProviderDisabled(String provider) { }
+        };
 
-            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, gpsListener);
-            locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, networkListener);
-            locationUpdatesRequested = true;
-        } catch (Exception e) {
-            Toast.makeText(getBaseContext(), "Error, Location not available", Toast.LENGTH_LONG).show();
-        }*/
+        networkListener = new LocationListener() {
+            @Override
+            public void onLocationChanged(@NonNull Location location) {
+                if (isBetterLocation(location)) {
+                    currentBestLocation = location;
+                }
+            }
+            @Override
+            public void onStatusChanged(String provider, int status, Bundle extras) { }
+            @Override
+            public void onProviderEnabled(String provider) { }
+            @Override
+            public void onProviderDisabled(String provider) { }
+        };
+
+        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, gpsListener);
+        locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, networkListener);
+        locationUpdatesRequested = true;
+    } catch (Exception e) {
+        Toast.makeText(getBaseContext(), "Error, Location not available", Toast.LENGTH_LONG).show();
+    }*/
     private void stopLocationUpdates() {
         if (Build.VERSION.SDK_INT >= 23 &&
                 ContextCompat.checkSelfPermission(getBaseContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
@@ -281,19 +305,20 @@ public class ContactMapActivity extends AppCompatActivity implements OnMapReadyC
 
         fusedLocationProviderClient.removeLocationUpdates(locationCallback);
     }
-        /* (locationManager != null) {
-            if (gpsListener != null) {
-                locationManager.removeUpdates(gpsListener);
-                gpsListener = null;
-            }
-            if (networkListener != null) {
-                locationManager.removeUpdates(networkListener);
-                networkListener = null;
-            }
-            locationManager = null;
+
+    /* (locationManager != null) {
+        if (gpsListener != null) {
+            locationManager.removeUpdates(gpsListener);
+            gpsListener = null;
         }
-        locationUpdatesRequested = false;
-    }*/
+        if (networkListener != null) {
+            locationManager.removeUpdates(networkListener);
+            networkListener = null;
+        }
+        locationManager = null;
+    }
+    locationUpdatesRequested = false;
+}*/
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
@@ -557,26 +582,28 @@ public class ContactMapActivity extends AppCompatActivity implements OnMapReadyC
     }
 
 
-    private void createLocationRequest(){
+    private void createLocationRequest() {
         locationRequest = LocationRequest.create();
         locationRequest.setInterval(10000);
         locationRequest.setFastestInterval(5000);
         locationRequest.setPriority(Priority.PRIORITY_HIGH_ACCURACY);
     }
 
-    private void createLocationCallback(){
-        locationCallback = new LocationCallback(){
+    private void createLocationCallback() {
+        locationCallback = new LocationCallback() {
             @Override
-            public void onLocationResult(LocationResult locationResult){
+            public void onLocationResult(LocationResult locationResult) {
 
-                if (locationResult == null){
+                if (locationResult == null) {
                     return;
                 }
-                for (Location location : locationResult.getLocations()){
+                for (Location location : locationResult.getLocations()) {
                     Toast.makeText(getBaseContext(), "Lat: " + location.getLatitude() + " Long: " + location.getLongitude() + " Accuracy: " + location.getAccuracy(), Toast.LENGTH_SHORT).show();
                 }
 
-            };
+            }
+
+            ;
         };
     }
 
@@ -588,12 +615,54 @@ public class ContactMapActivity extends AppCompatActivity implements OnMapReadyC
                 RadioButton rbNormal = findViewById(R.id.radioButtonNormal);
                 if (rbNormal.isChecked()) {
                     gMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
-                }
-                else {
+                } else {
                     gMap.setMapType(GoogleMap.MAP_TYPE_SATELLITE);
                 }
             }
         });
     }
+
+    private SensorEventListener mySensorEventListener = new SensorEventListener() {
+        @Override
+        public void onAccuracyChanged(Sensor sensor, int accuracy) {
+        }
+
+        float[] accelerometerValues;
+        float[] magneticValues;
+
+        public void onSensorChanged(SensorEvent event) {
+            if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER)
+                accelerometerValues = event.values;
+            if (event.sensor.getType() == Sensor.TYPE_MAGNETIC_FIELD) magneticValues = event.values;
+            if (accelerometerValues !=null && magneticValues != null){
+                float R[] = new float[9];
+                float I[] = new float[9];
+
+                boolean success = SensorManager.getRotationMatrix(R, I, accelerometerValues, magneticValues);
+
+                if (success) {
+                    float orientation[] = new float[3];
+                    SensorManager.getOrientation(R, orientation);
+                    float azimut = (float) Math.toDegrees(orientation[0]);
+                    if (azimut < 0.0f) {
+                        azimut += 360.0f;
+                    }
+
+                    String direction;
+                    if (azimut >= 315 || azimut < 45) {
+                        direction = "N";
+                    } else if (azimut >= 225 && azimut < 315) {
+                        direction = "W";
+                    } else if (azimut >= 135 && azimut < 225) {
+                        direction = "S";
+                    } else {
+                        direction = "E";
+                    }
+                    textHeading.setText(direction);
+                }
+            }
+        }
+    };
 }
+
 
