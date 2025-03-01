@@ -20,6 +20,8 @@ import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -69,6 +71,7 @@ public class ContactMapActivity extends AppCompatActivity implements OnMapReadyC
     final int PERMISSION_REQUEST_LOCATION = 101;
     private boolean locationUpdatesRequested = false;
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -99,6 +102,7 @@ public class ContactMapActivity extends AppCompatActivity implements OnMapReadyC
 
        // initGetLocationButton();
         initNavigationButtons();
+        initMapTypeButton();
 
     }
 
@@ -435,6 +439,8 @@ public class ContactMapActivity extends AppCompatActivity implements OnMapReadyC
     public void onMapReady(@NonNull GoogleMap googleMap) {
         gMap = googleMap;
         gMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
+        RadioButton rbNormal = findViewById(R.id.radioButtonNormal);
+        rbNormal.setChecked(true);
 
         Point size = new Point();
         WindowManager w = getWindowManager();
@@ -572,6 +578,22 @@ public class ContactMapActivity extends AppCompatActivity implements OnMapReadyC
 
             };
         };
+    }
+
+    private void initMapTypeButton() {
+        RadioGroup radioGroupMapType = findViewById(R.id.radioGroupMapType);
+        radioGroupMapType.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(RadioGroup group, int checkedId) {
+                RadioButton rbNormal = findViewById(R.id.radioButtonNormal);
+                if (rbNormal.isChecked()) {
+                    gMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
+                }
+                else {
+                    gMap.setMapType(GoogleMap.MAP_TYPE_SATELLITE);
+                }
+            }
+        });
     }
 }
 
