@@ -1,10 +1,15 @@
 package com.example.myproject;
 
+import android.Manifest;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.icu.util.Calendar;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.telephony.PhoneNumberFormattingTextWatcher;
 import android.text.Editable;
+import android.text.InputType;
 import android.text.TextWatcher;
 import android.text.format.DateFormat;
 import android.util.Log;
@@ -18,11 +23,16 @@ import android.widget.Toast;
 import android.widget.ToggleButton;
 
 import androidx.activity.EdgeToEdge;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.fragment.app.FragmentManager;
+
+import com.google.android.material.snackbar.Snackbar;
 
 public class MainActivity extends AppCompatActivity implements DatePickerDialog.SaveDateListener {
 
@@ -33,6 +43,7 @@ public class MainActivity extends AppCompatActivity implements DatePickerDialog.
     private ImageButton btnContacts, btnMap, btnSettings;
     private LinearLayout toolbar, bottomNavigationBar;
     private Contact currentContact;
+    private static final int PERMISSION_REQUEST_PHONE = 102;
     private ContactDataSource dataSource;
 
     @Override
@@ -62,7 +73,9 @@ public class MainActivity extends AppCompatActivity implements DatePickerDialog.
         // Initialize Toggle Button behavior
         initToggleButton();
         setForEditing(false); // Ensure editing is disabled by default
+        initCallFunction();
     }
+
     private void initToggleButton() {
         toggleEdit.setOnClickListener(v -> setForEditing(toggleEdit.isChecked()));
     }
@@ -105,9 +118,9 @@ public class MainActivity extends AppCompatActivity implements DatePickerDialog.
     private void openMap() {
         Intent intent = new Intent(MainActivity.this, ContactMapActivity.class);
 
-        if(currentContact.getContactID() != -1) {
+        if (currentContact.getContactID() != -1) {
             Toast.makeText(getBaseContext(), "Contact must be saved before it can be mapped", Toast.LENGTH_LONG).show();
-        }else {
+        } else {
             intent.putExtra("contactId", currentContact.getContactID());
         }
 
@@ -144,10 +157,12 @@ public class MainActivity extends AppCompatActivity implements DatePickerDialog.
             }
 
             @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
 
             @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {}
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+            }
         });
 
         editAddress.addTextChangedListener(new TextWatcher() {
@@ -157,10 +172,12 @@ public class MainActivity extends AppCompatActivity implements DatePickerDialog.
             }
 
             @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
 
             @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {}
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+            }
         });
 
         editCity.addTextChangedListener(new TextWatcher() {
@@ -170,10 +187,12 @@ public class MainActivity extends AppCompatActivity implements DatePickerDialog.
             }
 
             @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
 
             @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {}
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+            }
         });
 
         editState.addTextChangedListener(new TextWatcher() {
@@ -183,10 +202,12 @@ public class MainActivity extends AppCompatActivity implements DatePickerDialog.
             }
 
             @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
 
             @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {}
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+            }
         });
 
         editZipcode.addTextChangedListener(new TextWatcher() {
@@ -196,10 +217,12 @@ public class MainActivity extends AppCompatActivity implements DatePickerDialog.
             }
 
             @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
 
             @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {}
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+            }
         });
 
         editHome.addTextChangedListener(new TextWatcher() {
@@ -207,10 +230,14 @@ public class MainActivity extends AppCompatActivity implements DatePickerDialog.
             public void afterTextChanged(Editable s) {
                 currentContact.setPhoneNumber(editHome.getText().toString());
             }
+
             @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
+
             @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {}
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+            }
         });
 
         editCell.addTextChangedListener(new TextWatcher() {
@@ -218,10 +245,14 @@ public class MainActivity extends AppCompatActivity implements DatePickerDialog.
             public void afterTextChanged(Editable s) {
                 currentContact.setCellNumber(editCell.getText().toString());
             }
+
             @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
+
             @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {}
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+            }
         });
 
         editEmail.addTextChangedListener(new TextWatcher() {
@@ -229,10 +260,14 @@ public class MainActivity extends AppCompatActivity implements DatePickerDialog.
             public void afterTextChanged(Editable s) {
                 currentContact.seteMail(editEmail.getText().toString());
             }
+
             @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
+
             @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {}
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+            }
         });
     }
 
@@ -242,18 +277,56 @@ public class MainActivity extends AppCompatActivity implements DatePickerDialog.
         editCity.setEnabled(enabled);
         editState.setEnabled(enabled);
         editZipcode.setEnabled(enabled);
-        editHome.setEnabled(enabled);
-        editCell.setEnabled(enabled);
+        if (enabled) {
+            editHome.setInputType(android.text.InputType.TYPE_CLASS_PHONE);
+            editCell.setInputType(android.text.InputType.TYPE_CLASS_PHONE);
+        } else {
+            editHome.setInputType(android.text.InputType.TYPE_NULL);
+            editCell.setInputType(android.text.InputType.TYPE_NULL);
+        }
         editEmail.setEnabled(enabled);
         buttonBirthday.setEnabled(enabled);
     }
-/*
+
+    /*
+        private void initSaveButton() {
+            dataSource = new ContactDataSource(com.example.myproject.com.example.myproject.MainActivity.this);
+
+            boolean wasSuccessful;
+            try {
+                dataSource.open();
+                if (currentContact.getContactID() == -1) {
+                    wasSuccessful = dataSource.insertContact(currentContact);
+                    if (wasSuccessful) {
+                        int newId = dataSource.getLastContactID();
+                        currentContact.setContactID(newId);
+                    }
+                } else {
+                    wasSuccessful = dataSource.updateContact(currentContact);
+                }
+                dataSource.close();
+            } catch (Exception e) {
+                wasSuccessful = false;
+                e.printStackTrace();
+            }
+
+            if (wasSuccessful) {
+                toggleEdit.setChecked(false);
+                setForEditing(false);
+            }
+        }*/
     private void initSaveButton() {
         dataSource = new ContactDataSource(MainActivity.this);
 
         boolean wasSuccessful;
         try {
             dataSource.open();
+
+            Log.d("SAVE", "Saving Contact: " + currentContact.getContactName());
+            Log.d("SAVE", "Phone: " + currentContact.getPhoneNumber());
+            Log.d("SAVE", "Cell: " + currentContact.getCellNumber());
+            Log.d("SAVE", "Email: " + currentContact.geteMail());
+
             if (currentContact.getContactID() == -1) {
                 wasSuccessful = dataSource.insertContact(currentContact);
                 if (wasSuccessful) {
@@ -273,39 +346,7 @@ public class MainActivity extends AppCompatActivity implements DatePickerDialog.
             toggleEdit.setChecked(false);
             setForEditing(false);
         }
-    }*/
-private void initSaveButton() {
-    dataSource = new ContactDataSource(MainActivity.this);
-
-    boolean wasSuccessful;
-    try {
-        dataSource.open();
-
-        Log.d("SAVE", "Saving Contact: " + currentContact.getContactName());
-        Log.d("SAVE", "Phone: " + currentContact.getPhoneNumber());
-        Log.d("SAVE", "Cell: " + currentContact.getCellNumber());
-        Log.d("SAVE", "Email: " + currentContact.geteMail());
-
-        if (currentContact.getContactID() == -1) {
-            wasSuccessful = dataSource.insertContact(currentContact);
-            if (wasSuccessful) {
-                int newId = dataSource.getLastContactID();
-                currentContact.setContactID(newId);
-            }
-        } else {
-            wasSuccessful = dataSource.updateContact(currentContact);
-        }
-        dataSource.close();
-    } catch (Exception e) {
-        wasSuccessful = false;
-        e.printStackTrace();
     }
-
-    if (wasSuccessful) {
-        toggleEdit.setChecked(false);
-        setForEditing(false);
-    }
-}
 
 
     private void initContact(int id) {
@@ -340,4 +381,81 @@ private void initSaveButton() {
             textBirthday.setText("No Birthday");
         }
     }
+
+    private void initCallFunction() {
+        EditText editPhone = (EditText) findViewById(R.id.editHome);
+        editPhone.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                checkPhonePermission(currentContact.getPhoneNumber());
+                return false;
+            }
+        });
+        EditText editCell = (EditText) findViewById(R.id.editCell);
+        editCell.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                checkPhonePermission(currentContact.getCellNumber());
+                return false;
+            }
+        });
+    }
+
+    private void checkPhonePermission(String phoneNumber) {
+        if (Build.VERSION.SDK_INT >= 23) {
+            if (ContextCompat.checkSelfPermission(MainActivity.this,
+                    android.Manifest.permission.CALL_PHONE)
+                    != PackageManager.PERMISSION_GRANTED) {
+
+                if (ActivityCompat.shouldShowRequestPermissionRationale(
+                        MainActivity.this,
+                        Manifest.permission.CALL_PHONE)) {
+                        Snackbar.make(findViewById(R.id.activity_main),
+                            "MyContactList requires this permission to place a call from the app.",
+                            Snackbar.LENGTH_INDEFINITE).setAction("OK", new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                ActivityCompat.requestPermissions(MainActivity.this, new String[]{
+                                android.Manifest.permission.CALL_PHONE}, PERMISSION_REQUEST_PHONE);
+                            }
+                            })
+                                .show();
+                        } else {
+                    ActivityCompat.requestPermissions(MainActivity.this, new String[]{ android.Manifest.permission.CALL_PHONE}, PERMISSION_REQUEST_PHONE);
+                }
+                } else {
+                callContact(phoneNumber);
+            }
+    } else {
+            callContact(phoneNumber);
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+        @NonNull String permissions[], @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+            switch (requestCode) {
+                case PERMISSION_REQUEST_PHONE: {
+                    if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                        Toast.makeText(MainActivity.this, "You may now call from this app.", Toast.LENGTH_SHORT).show();
+                    } else {
+                        Toast.makeText(MainActivity.this, "You will not be able to make calls from this app.", Toast.LENGTH_SHORT).show();
+                    }
+                }
+            }
+        }
+
+
+    private void callContact(String phoneNumber) {
+        Intent intent = new Intent(Intent.ACTION_CALL);
+        intent.setData(Uri.parse("tel:" + phoneNumber));
+
+        if (Build.VERSION.SDK_INT >= 23 && ContextCompat.checkSelfPermission( this, Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED) {
+            return;
+        }
+            startActivity(intent);
+        }
+
 }
+
