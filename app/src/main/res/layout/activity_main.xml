@@ -128,16 +128,16 @@
 
             <EditText
                 android:id="@+id/editContact"
-                android:layout_width="328dp"
+                android:layout_width="301dp"
                 android:layout_height="48dp"
                 android:hint="Enter Name"
                 android:inputType="text"
                 app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.058"
+                app:layout_constraintEnd_toStartOf="@+id/imageContact"
+                app:layout_constraintHorizontal_bias="0.473"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/textContact"
-                app:layout_constraintVertical_bias="0.025" />
+                app:layout_constraintVertical_bias="0.017" />
 
             <EditText
                 android:id="@+id/editAddress"
@@ -291,7 +291,7 @@
             <TextView
                 android:id="@+id/textBirthday"
                 android:layout_width="80dp"
-                android:layout_height="23dp"
+                android:layout_height="48dp"
                 android:inputType="text"
                 android:text="01/01/1970"
                 app:layout_constraintBottom_toBottomOf="parent"
@@ -311,6 +311,19 @@
                 app:layout_constraintHorizontal_bias="0.777"
                 app:layout_constraintStart_toEndOf="@+id/textBDay"
                 app:layout_constraintTop_toBottomOf="@+id/editEmail" />
+
+            <ImageButton
+                android:id="@+id/imageContact"
+                android:layout_width="83dp"
+                android:layout_height="62dp"
+                android:layout_marginTop="20dp"
+                android:layout_marginBottom="1dp"
+                app:layout_constraintBottom_toTopOf="@+id/textAddress"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.951"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="@+id/textContact"
+                app:srcCompat="@drawable/photoicon" />
         </androidx.constraintlayout.widget.ConstraintLayout>
     </ScrollView>
 
