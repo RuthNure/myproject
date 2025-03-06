@@ -49,6 +49,8 @@ public class MainActivity extends AppCompatActivity implements DatePickerDialog.
 
     private static final int PERMISSION_REQUEST_CAMERA = 103;
 
+    private static final int PERMISSION_REQUEST_SMS = 104;
+
     final int CAMERA_REQUEST = 1888;
     private ContactDataSource dataSource;
 
@@ -80,6 +82,7 @@ public class MainActivity extends AppCompatActivity implements DatePickerDialog.
         initToggleButton();
         setForEditing(false); // Ensure editing is disabled by default
         initCallFunction();
+        initMessageFunction();
         initImageButton();
     }
 
@@ -407,11 +410,22 @@ public class MainActivity extends AppCompatActivity implements DatePickerDialog.
                 return false;
             }
         });
-        EditText editCell = (EditText) findViewById(R.id.editCell);
+        /*EditText editCell = (EditText) findViewById(R.id.editCell);
         editCell.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
                 checkPhonePermission(currentContact.getCellNumber());
+                return false;
+            }
+        });*/
+    }
+
+    private void initMessageFunction() {
+        EditText editCell = (EditText) findViewById(R.id.editCell);
+        editCell.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                checkSMSPermission(currentContact.getCellNumber());
                 return false;
             }
         });
@@ -447,6 +461,38 @@ public class MainActivity extends AppCompatActivity implements DatePickerDialog.
         }
     }
 
+    private void checkSMSPermission(String cellNumber) {
+        if (Build.VERSION.SDK_INT >= 23) {
+            if (ContextCompat.checkSelfPermission(MainActivity.this,
+                    Manifest.permission.SEND_SMS)
+                    != PackageManager.PERMISSION_GRANTED) {
+
+                if (ActivityCompat.shouldShowRequestPermissionRationale(
+                        MainActivity.this,
+                        Manifest.permission.SEND_SMS)) {
+                    Snackbar.make(findViewById(R.id.activity_main),
+                                    "MyContactList requires this permission to send a text from the app.",
+                                    Snackbar.LENGTH_INDEFINITE).setAction("OK", new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+                                    ActivityCompat.requestPermissions(MainActivity.this, new String[]{
+                                            Manifest.permission.SEND_SMS}, PERMISSION_REQUEST_SMS);
+                                }
+                            })
+                            .show();
+                } else {
+                    ActivityCompat.requestPermissions(MainActivity.this, new String[]{ Manifest.permission.SEND_SMS}, PERMISSION_REQUEST_SMS);
+                }
+            } else {
+                SMSContact(cellNumber);
+            }
+        } else {
+            SMSContact(cellNumber);
+        }
+    }
+
+
+
     @Override
     public void onRequestPermissionsResult(int requestCode,
         @NonNull String permissions[], @NonNull int[] grantResults) {
@@ -466,6 +512,13 @@ public class MainActivity extends AppCompatActivity implements DatePickerDialog.
                         Toast.makeText(MainActivity.this, "You will not be able to save contact pictures from this app.", Toast.LENGTH_SHORT).show();
                     }
                 }
+                case PERMISSION_REQUEST_SMS: {
+                    if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                        Toast.makeText(MainActivity.this, "You may now send a sms from this app.", Toast.LENGTH_SHORT).show();
+                    } else {
+                        Toast.makeText(MainActivity.this, "You will not be able to send sms from this app.", Toast.LENGTH_SHORT).show();
+                    }
+                }
             }
         }
 
@@ -479,6 +532,19 @@ public class MainActivity extends AppCompatActivity implements DatePickerDialog.
         }
             startActivity(intent);
         }
+
+    private void SMSContact(String cellNumber) {
+        Intent intent = new Intent(Intent.ACTION_SENDTO);
+        intent.setData(Uri.parse("smsto:" + cellNumber));
+        if (intent.resolveActivity(getPackageManager()) != null) {
+            if (Build.VERSION.SDK_INT >= 23 && ContextCompat.checkSelfPermission(this, Manifest.permission.SEND_SMS) != PackageManager.PERMISSION_GRANTED) {
+                return;
+            }
+            startActivity(intent);
+        } else {
+            Toast.makeText(MainActivity.this, "No app sms.", Toast.LENGTH_SHORT).show();
+        }
+    }
 
     private void initImageButton() {
         ImageButton ib = findViewById(R.id.imageContact);
